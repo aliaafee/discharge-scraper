@@ -1,6 +1,7 @@
 # Ignore
-discharges
-scraper/bsconverter
+discharges/
+test/
+text.csv
 
 
 
@@ -110,6 +111,7 @@ celerybeat.pid
 # Environments
 .env
 .venv
+.venv2
 env/
 venv/
 ENV/
