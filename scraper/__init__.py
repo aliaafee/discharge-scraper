@@ -6,8 +6,8 @@ from .bsconverter import bsconverter
 import collections
 
 class Scraper:
-    def __init__(self, field_definition):
-        self.field_definition = field_definition
+    def __init__(self):
+        self.field_definition = {}
         
         self.default_process = [
             self.clean_up,
@@ -19,10 +19,14 @@ class Scraper:
         
         self.field_process = {}
         
-        self.generate_field_regex()
 
     def get_field_names(self):
         return [field for field in self.field_definition.keys()] + ['file_path']
+        
+        
+    def set_field_definition(self, field_definition):
+        self.field_definition = field_definition
+        self.generate_field_regex()
         
         
     def set_custom_processing(self, field_process):
@@ -246,6 +250,8 @@ class Scraper:
 
 if __name__ == '__main__':
 
+    scraper = Scraper()
+
     FIELDS = collections.OrderedDict()
     
     #Fields that will be extracted
@@ -253,10 +259,8 @@ if __name__ == '__main__':
     FIELDS["name"] = ["Name:"]
     FIELDS["age"] = ["Age:"]
     FIELDS["sex"] = ["Sex:"]
-
-    scraper = Scraper(
-        FIELDS
-    )
+    
+    scraper.set_field_definition(FIELDS)
     
     with CSVWriter('test.csv', scraper.get_field_names()) as writer:
         scraper.extract_data("./test", writer)
