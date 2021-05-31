@@ -1,3 +1,9 @@
+# Ignore
+discharges
+scraper/bsconverter
+
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
