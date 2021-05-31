@@ -1,0 +1,3 @@
+[submodule ".\\scraper\\bsconverter"]
+	path = .\\scraper\\bsconverter
+	url = https://github.com/aliaafee/bsconverter.git
