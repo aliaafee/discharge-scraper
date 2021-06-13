@@ -5,6 +5,12 @@ import csv
 class DataWriter:
     def __init__(self, field_definition):
         self.field_definition = field_definition
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, type, value,traceback):
+        pass
     
     def gen_output_row(self, record):
         output_row = []
@@ -23,7 +29,7 @@ class DataWriter:
 
     def write_record(self, record):
         row = self.gen_output_row(record)
-        print("\t".join(row))
+        print("\t".join((str(cell) for cell in row)))
 
 
 

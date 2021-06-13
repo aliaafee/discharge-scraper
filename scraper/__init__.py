@@ -1,7 +1,7 @@
 import os
 import re
 import docx2txt
-from .data_writer import CSVWriter
+from .data_writer import CSVWriter, DataWriter
 from .bsconverter import bsconverter
 import collections
 

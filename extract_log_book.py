@@ -1,5 +1,8 @@
 import collections
+import getopt
+from scraper.data_writer import DataWriter
 from scraper import Scraper, CSVWriter
+import sys
 
 #Initialize the scraper
 scraper = Scraper()
@@ -36,8 +39,65 @@ field_process["operation"] = scraper.default_process + [scraper.remove_date]
 field_process["operated_bs"] = scraper.default_process + [scraper.extract_date, scraper.sanitize_date]
 field_process["operated_ad"] = field_process["discharged_bs"] + [scraper.convert_date_bs2ad]
 
-
 scraper.set_field_definition(fields)
 scraper.set_custom_processing(field_process)
-with CSVWriter('test.csv', scraper.get_field_names()) as writer:
-    scraper.extract_data("./test", writer)
+
+
+def scrape(src_folder, out_file_csv=""):
+    if not out_file_csv:
+        with DataWriter(scraper.get_field_names()) as writer:
+            scraper.extract_data(src_folder, writer)
+        return
+
+    with CSVWriter(out_file_csv, scraper.get_field_names()) as writer:
+        scraper.extract_data(src_folder, writer)
+
+
+def usage():
+    """App usage"""
+    print(f"Usage: {sys.argv[0]} [OPTIONS]... [FOLDER]")
+    print("Extract data from all .docx discharge files located in [FOLDER]")
+    print("Recursively looks in all folders")
+    print("    -o, --out")
+    print("       Output CSV file")
+    print("    -h, --help")
+    print("       Displays this help")
+
+
+
+def main(argv):
+    src_folder = ""
+    out_file_csv = ""
+    
+    try:
+        opts, args = getopt.getopt(argv, "ho:", ["help", "out="])
+    except getopt.GetoptError:
+        usage()
+        sys.exit(2)
+
+    if args:
+        src_folder = args[0]
+    else:
+        usage()
+        sys.exit(2)
+
+    for opt, arg in opts:
+        if opt in ("-h", "--help"):
+            usage()
+            sys.exit()
+        if opt in ("-o", "--out"):
+            out_file_csv = arg
+
+    if not src_folder:
+        usage()
+        sys.exit(2)
+    scrape(src_folder, out_file_csv)
+        
+        
+
+    
+    
+
+
+if __name__ == '__main__':
+    main(sys.argv[1:])
