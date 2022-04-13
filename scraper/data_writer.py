@@ -42,7 +42,7 @@ class CSVWriter(DataWriter):
 
     def __enter__(self):
         print("opening csv file")
-        self.datafile = open(self.filename, mode='w')
+        self.datafile = open(self.filename, mode='w', newline='')
         self.datafile_writer = csv.writer(self.datafile, delimiter=',',
                                           quotechar='"', quoting=csv.QUOTE_ALL)
         self.write_header()

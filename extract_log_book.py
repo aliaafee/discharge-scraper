@@ -4,6 +4,10 @@ from scraper.data_writer import DataWriter
 from scraper import Scraper, CSVWriter
 import sys
 
+import tkinter as tk
+from tkinter import filedialog, messagebox
+from threading import Thread
+
 #Initialize the scraper
 scraper = Scraper()
 
@@ -65,6 +69,56 @@ def usage():
 
 
 
+def main_gui():
+    root = tk.Tk()
+    root.title("Discharge Scraper")
+    root.geometry('300x50+50+50')
+
+    status = tk.Label(root, text="0 Files Processed")
+
+    status.pack()
+
+    src_folder = filedialog.askdirectory(title="Folder Containing Discharges")
+
+    if not src_folder:
+        root.withdraw()
+        return
+
+    out_file_csv = filedialog.asksaveasfilename(title="Output CSV file", filetypes=(("csv files","*.csv"),("all files","*.*")))
+
+    if not out_file_csv:
+        root.withdraw()
+        return
+
+    def scrape_function():
+        with CSVWriter(out_file_csv, scraper.get_field_names()) as writer:
+            scraper.extract_data(src_folder, writer)
+
+    new_thread = Thread(target=scrape_function)
+
+    def monitor():
+        if new_thread.is_alive():
+            status.config(text ="{} File Processed".format(scraper.files_processed))
+            status.update()
+            root.after(100, monitor)
+        else:
+            status.config(text ="{} Completed Processing".format(scraper.files_processed))
+            status.update()
+            messagebox.showinfo("Done", "Finished extracting data from discharges to {}".format(out_file_csv))
+            root.destroy()
+    
+    def on_closing():
+        if messagebox.askokcancel("Quit", "Do you want to quit?"):
+            root.destroy()
+
+    root.protocol("WM_DELETE_WINDOW", on_closing)
+
+    new_thread.start()
+    monitor()
+
+    root.mainloop()
+    
+    
 def main(argv):
     src_folder = ""
     out_file_csv = ""
@@ -78,8 +132,10 @@ def main(argv):
     if args:
         src_folder = args[0]
     else:
-        usage()
-        sys.exit(2)
+        #usage()
+        #sys.exit(2)
+        main_gui()
+        return
 
     for opt, arg in opts:
         if opt in ("-h", "--help"):

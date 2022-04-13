@@ -18,6 +18,9 @@ class Scraper:
         ]
         
         self.field_process = {}
+
+        self.files_processed = 0
+        self.bad_files = []
         
 
     def get_field_names(self):
@@ -171,10 +174,13 @@ class Scraper:
 
 
     def get_fulltext(self, filename):
-        text = docx2txt.process(filename)
-        return text
-
-
+        try:
+            text = docx2txt.process(filename)
+            return text
+        except:
+            print("Cannot open file '{}'".format(filename))
+            return None
+        
     def match_field(self, field_name, text):
         for field_regex in self.field_regex[field_name]:
             match = field_regex.search(text)
@@ -231,20 +237,20 @@ class Scraper:
 
 
     def extract_data(self, src_folder, data_writer, exclude_filename_prefix=["~", "."], include_filename_extension=[".docx"]):
+        self.files_processed = 0
         for root, subdirs, files in os.walk(src_folder):
             for filename in files:
                 if not self.is_excluded_filename(filename, exclude_filename_prefix, include_filename_extension):
                     filepath = os.path.join(root, filename)
-                    #try:
                     file_text = self.get_fulltext(filepath)
-                    #except:
-                    #    print("Cannot read {}".format(filepath))
-                    fields, nomatch = self.extract_fields(file_text)
-                    fields["file_path"] = filepath
-                    data_writer.write_record(fields)
-                    #if nomatch:
-                    #    print(filepath)
-                    #    print("\tMissing Fields:{}".format(",".join(nomatch)))
+                    if file_text:
+                        fields, nomatch = self.extract_fields(file_text)
+                        fields["file_path"] = filepath
+                        data_writer.write_record(fields)
+                    else:
+                        print("No content in '{}'".format(filepath))
+                        self.bad_files.append(filepath)
+                    self.files_processed += 1
 
 
 
